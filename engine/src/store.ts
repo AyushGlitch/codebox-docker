@@ -1,35 +1,79 @@
 import { Client as MinioClient } from "minio";
 import fs from "fs";
 import path from "path";
+const { execSync } = require('child_process');
+
+// const minioClient = new MinioClient({
+//     endPoint: 'localhost',
+//     port: 9000,
+//     accessKey: "xcrVtD8yusfX8vc6j9gY",
+//     secretKey: "arhqi6H7H9slSeMYp7d0NrHSMvtgKntHlOJTy7NF",
+//     useSSL: false
+// });
+
 
 const minioClient = new MinioClient({
-    endPoint: 'localhost',
+    endPoint: 'minio2',
     port: 9000,
-    accessKey: "xcrVtD8yusfX8vc6j9gY",
-    secretKey: "arhqi6H7H9slSeMYp7d0NrHSMvtgKntHlOJTy7NF",
-    useSSL: false
+    useSSL: false,
+    accessKey: '2KB3SpO8E9vk5bmU9brK',
+    secretKey: 'uvbKZoElanKkUxYTuIDs2SJisvbQLgfs5Zej9s2Y'
 });
+
 
 export const fetchMinioFolder = async (key: string, localPath: string): Promise<void> => {
     const bucketName = process.env.STORE_BUCKET ?? "";
-    
+    console.log('LocalPath:', localPath);
+    console.log('Minio Key:', key);
+  
     const stream = minioClient.listObjectsV2(bucketName, key, true);
-
+  
     for await (const obj of stream) {
-        const fileKey = obj.name;
-        const data = await minioClient.getObject(bucketName, fileKey);
-        
-        const chunks: Buffer[] = [];
-        for await (const chunk of data) {
-            chunks.push(chunk);
-        }
-
-        const fileData = Buffer.concat(chunks);
-        const filePath = `${localPath}/${fileKey.replace(key, "")}`;
-        //@ts-ignore
-        await writeFile(filePath, fileData);
+      const fileKey = obj.name;
+      const data = await minioClient.getObject(bucketName, fileKey);
+      const chunks: Buffer[] = [];
+      for await (const chunk of data) {
+        chunks.push(chunk);
+      }
+      const fileData = Buffer.concat(chunks);
+      const filePath = path.join(localPath, fileKey.replace(key, ""));
+      console.log('File Path:', filePath);
+  
+      // Ensure the directory exists
+      fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  
+      // Write the file
+      fs.writeFileSync(filePath, fileData);
+  
+      // Make the file executable if it's run.sh
+      if (path.basename(filePath) === 'run.sh') {
+        fs.chmodSync(filePath, '777');
+        console.log('Made run.sh executable');
+      }
     }
-};
+  
+    console.log('All files downloaded successfully');
+  
+    // Run the script
+    const runScriptPath = path.join(localPath, 'run.sh');
+    console.log('Run Script Path:', runScriptPath);
+  
+    if (fs.existsSync(runScriptPath)) {
+      console.log('Making run.sh executable...');
+      fs.chmodSync(runScriptPath, '777');
+      console.log('Running run.sh...');
+      try {
+        execSync(`/bin/bash ${runScriptPath}`, { stdio: 'inherit' });
+
+      } catch (error) {
+        console.error('Error executing run.sh:', error);
+      }
+    } 
+    else {
+      console.log('run.sh not found in the downloaded files');
+    }
+  };
+
 
 export async function copyMinioFolder(sourcePrefix: string, destinationPrefix: string): Promise<void> {
     try {

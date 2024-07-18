@@ -1,13 +1,22 @@
 import * as Minio from 'minio'
 
 
-const storeClient= new Minio.Client({
+// const storeClient= new Minio.Client({
+//     endPoint: 'localhost',
+//     port: 9000,
+//     accessKey: "xcrVtD8yusfX8vc6j9gY",
+//     secretKey: "arhqi6H7H9slSeMYp7d0NrHSMvtgKntHlOJTy7NF",
+//     useSSL: false
+// })
+
+
+const storeClient = new Minio.Client({
     endPoint: 'localhost',
     port: 9000,
-    accessKey: "xcrVtD8yusfX8vc6j9gY",
-    secretKey: "arhqi6H7H9slSeMYp7d0NrHSMvtgKntHlOJTy7NF",
-    useSSL: false
-})
+    useSSL: false,
+    accessKey: '2KB3SpO8E9vk5bmU9brK',
+    secretKey: 'uvbKZoElanKkUxYTuIDs2SJisvbQLgfs5Zej9s2Y'
+});
 
 
 export const copyObjectFolder= async (srcPrefix: string, dest: string) => {

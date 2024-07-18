@@ -1,55 +1,50 @@
 import express from "express";
-import fs from "fs";
-import yaml from "yaml";
-import path from "path";
 import cors from "cors";
-import { KubeConfig, AppsV1Api, CoreV1Api, NetworkingV1Api } from "@kubernetes/client-node";
+import Docker from "dockerode"
+
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const kubeconfig = new KubeConfig();
-kubeconfig.loadFromDefault();
-const coreV1Api = kubeconfig.makeApiClient(CoreV1Api);
-const appsV1Api = kubeconfig.makeApiClient(AppsV1Api);
-const networkingV1Api = kubeconfig.makeApiClient(NetworkingV1Api);
 
-// Updated utility function to handle multi-document YAML files
-const readAndParseKubeYaml = (filePath: string, codeBoxId: string): Array<any> => {
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    const docs = yaml.parseAllDocuments(fileContent).map((doc) => {
-        let docString = doc.toString();
-        const regex = new RegExp(`service_name`, 'g');
-        docString = docString.replace(regex, codeBoxId);
-        console.log(docString);
-        return yaml.parse(docString);
-    });
-    return docs;
-};
+const docker = new Docker({ socketPath: '/home/ayush/.docker/desktop/docker.sock' });
+
 
 app.post("/start", async (req, res) => {
-    const { codeBoxId, language } = req.body; // Assume a unique identifier for each user
-    const namespace = "default"; // Assuming a default namespace, adjust as needed
+    const { codeBoxId, language } = req.body;
 
     try {
-        // const kubeManifests = readAndParseKubeYaml(path.join(__dirname, "../service.yaml"), codeBoxId);
-        // for (const manifest of kubeManifests) {
-        //     switch (manifest.kind) {
-        //         case "Deployment":
-        //             await appsV1Api.createNamespacedDeployment(namespace, manifest);
-        //             break;
-        //         case "Service":
-        //             await coreV1Api.createNamespacedService(namespace, manifest);
-        //             break;
-        //         case "Ingress":
-        //             await networkingV1Api.createNamespacedIngress(namespace, manifest);
-        //             break;
-        //         default:
-        //             console.log(`Unsupported kind: ${manifest.kind}`);
-        //     }
-        // }
+        const container= await docker.createContainer({
+            Image: "glitchayush/codebox-docker-engine",
+            name: codeBoxId,
+            ExposedPorts: {
+                '3000/tcp': {},
+                '3001/tcp': {}
+            },
+            HostConfig: {
+                PortBindings: {
+                    '3000/tcp': [{ HostPort: '3000' }],
+                    '3001/tcp': [{ HostPort: '3001' }]
+                }
+            },
+            NetworkingConfig: {
+                EndpointsConfig: {
+                    'my-network': {}
+                }
+            }
+        })
+        await container.start()
+
+        console.log("Container started successfully");
+        // @ts-ignore
+        // .then(container => container.start())
+        // .then(() => {
+        //     console.log("Container started successfully");
+        // })
+
         res.status(200).send({ message: "Resources created successfully" });
+
     } catch (error) {
         console.error("Failed to create resources", error);
         res.status(500).send({ message: "Failed to create resources" });

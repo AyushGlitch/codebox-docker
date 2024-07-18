@@ -2,7 +2,7 @@ import { Server, Socket } from "socket.io";
 import { TerminalManager } from "./pty";
 import { Server as HttpServer } from "http";
 import { fetchDir, fetchFileContent, saveFile } from "./fs";
-import { saveToMinio } from "./store";
+import { fetchMinioFolder, saveToMinio } from "./store";
 
 
 
@@ -22,22 +22,27 @@ export function initWs(httpServer: HttpServer) {
         // Auth checks should happen here
         const host = socket.handshake.headers.host;
         console.log(`host is ${host}`);
+        console.log(`${host?.split('.')[0]}`)
+
         // Split the host by '.' and take the first part as replId
         const replId= socket.handshake.query.replId as string;
         console.log(`replId is ${replId}`);
         // const replId = host?.split('.')[0];
+
+        await fetchMinioFolder(`codebox/${replId}/`, `./workspace`);
     
         if (!replId) {
             socket.disconnect();
             terminalManager.clear(socket.id);
             return;
         }
+        
+        initHandlers(socket, replId);
 
         socket.emit("loaded", {
             rootContent: await fetchDir("./workspace", "")
         });
 
-        initHandlers(socket, replId);
     });
 }
 

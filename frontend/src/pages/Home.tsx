@@ -15,9 +15,21 @@ const languages = [
         value: 'python'
     },
     {
-        name: 'Go',
-        value: 'go'
+        name: 'C++',
+        value: 'cpp'
+    },
+    {
+        name: 'C',
+        value: 'c'
     }
+    // {
+    //     name: 'Go',
+    //     value: 'go'
+    // },
+    // {
+    //     name: 'Zig',
+    //     value: 'zig'
+    // }
 ];
 
 
