@@ -122,7 +122,7 @@ const Home = () => {
     }
 
     return (
-        <div className="w-full mt-20 flex gap-5 mb-5 max-h-screen">
+        <div className="w-full mt-20 flex mb-5 max-h-screen">
             <PastCodeBoxes />
 
             <div className="w-2/3 flex flex-col justify-center items-center gap-20">
