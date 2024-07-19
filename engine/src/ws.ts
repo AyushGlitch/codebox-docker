@@ -36,7 +36,7 @@ export function initWs(httpServer: HttpServer) {
             terminalManager.clear(socket.id);
             return;
         }
-        
+
         initHandlers(socket, replId);
 
         socket.emit("loaded", {

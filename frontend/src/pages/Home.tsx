@@ -11,6 +11,10 @@ const languages = [
         value: 'javascript'
     },
     {
+        name: 'Typescript',
+        value: 'typescript'
+    },
+    {
         name: 'Python',
         value: 'python'
     },
@@ -21,14 +25,34 @@ const languages = [
     {
         name: 'C',
         value: 'c'
-    }
+    },
+    {
+        name: 'Go',
+        value: 'go'
+    },
+    {
+        name: 'Zig',
+        value: 'zig'
+    },
+    {
+        name: 'Rust',
+        value: 'rust'
+    },
+    {
+        name: 'Ruby',
+        value: 'ruby'
+    },
+    {
+        name: 'PHP',
+        value: 'php'
+    },
     // {
-    //     name: 'Go',
-    //     value: 'go'
+    //     name: 'Scala',
+    //     value: 'scala'
     // },
     // {
-    //     name: 'Zig',
-    //     value: 'zig'
+    //     name: 'Haskell',
+    //     value: 'haskell'
     // }
 ];
 

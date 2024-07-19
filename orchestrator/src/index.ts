@@ -51,6 +51,23 @@ app.post("/start", async (req, res) => {
     }
 });
 
+
+app.post("/stop", async (req, res) => {
+    const { codeBoxId } = req.body
+
+    try {
+        const container= docker.getContainer(codeBoxId)
+        await container.stop()
+        await container.remove()
+
+        console.log("Container stopped and removed successfully");
+        res.status(200).send({ message: "Resources deleted successfully" });
+    }
+    catch (error) {
+        console.error("Failed to delete resources", error);
+    }
+})
+
 const port = process.env.PORT || 3002;
 app.listen(port, () => {
     console.log(`Listening on port: ${port}`);

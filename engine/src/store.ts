@@ -22,6 +22,7 @@ const minioClient = new MinioClient({
 
 
 export const fetchMinioFolder = async (key: string, localPath: string): Promise<void> => {
+  try {
     const bucketName = process.env.STORE_BUCKET ?? "";
     console.log('LocalPath:', localPath);
     console.log('Minio Key:', key);
@@ -61,18 +62,19 @@ export const fetchMinioFolder = async (key: string, localPath: string): Promise<
     if (fs.existsSync(runScriptPath)) {
       console.log('Making run.sh executable...');
       fs.chmodSync(runScriptPath, '777');
-      console.log('Running run.sh...');
-      try {
-        execSync(`/bin/bash ${runScriptPath}`, { stdio: 'inherit' });
 
-      } catch (error) {
-        console.error('Error executing run.sh:', error);
-      }
+      console.log('Running run.sh...');
+      execSync(`/bin/bash ${runScriptPath}`, { stdio: 'inherit' });
     } 
     else {
       console.log('run.sh not found in the downloaded files');
     }
-  };
+  } 
+
+  catch (error) {
+    console.error('Error executing run.sh:', error);
+  }
+};
 
 
 export async function copyMinioFolder(sourcePrefix: string, destinationPrefix: string): Promise<void> {

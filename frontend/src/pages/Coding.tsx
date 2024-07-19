@@ -11,6 +11,12 @@ const useSocket = (codeBoxId: string) => {
     const [socket, setSocket] = useState<Socket | null>(null)
 
     useEffect( () => {
+        // async function copyData() {
+        //     await axios.post(`http://localhost:3001/copy`, { replId: codeBoxId })
+        // }
+
+        // copyData()
+
         const ws= io(`ws://localhost:3001`, {
             query: {
                 "replId": codeBoxId
@@ -36,10 +42,21 @@ function Coding() {
     const language= searchParams.get('lang')
 
     useEffect( () => {
+        async function createCodeBox() {
+            try {
+                await axios.post(`${import.meta.env.VITE_ORCHESTRATOR_URL}/start`, { codeBoxId, language })
+                // await axios.post(`http://localhost:3001/copy`, { replId: codeBoxId })
+
+                setCodeBoxCreated(true)
+
+            }
+            catch (err) {
+                console.error(err)
+            }
+        }
+
         if (codeBoxId && language) {
-            axios.post(`${import.meta.env.VITE_ORCHESTRATOR_URL}/start`, { codeBoxId, language })
-                .then( () => setCodeBoxCreated(true) )
-                .catch( (err) => console.error(err) )
+            createCodeBox()
         }
     }, [] )
 
