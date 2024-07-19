@@ -3,6 +3,7 @@ import { TerminalManager } from "./pty";
 import { Server as HttpServer } from "http";
 import { fetchDir, fetchFileContent, saveFile } from "./fs";
 import { fetchMinioFolder, saveToMinio } from "./store";
+import chokidar from "chokidar";
 
 
 
@@ -38,6 +39,13 @@ export function initWs(httpServer: HttpServer) {
         }
 
         initHandlers(socket, replId);
+
+        chokidar.watch('./workspace').on('all', async (event, path) => {
+            const rootContent= await fetchDir("./workspace", "")
+            socket.emit("loaded", {
+                rootContent
+            });
+        })
 
         socket.emit("loaded", {
             rootContent: await fetchDir("./workspace", "")
