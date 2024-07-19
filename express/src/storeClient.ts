@@ -1,4 +1,7 @@
 import * as Minio from 'minio'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 
 // const storeClient= new Minio.Client({
@@ -14,8 +17,8 @@ const storeClient = new Minio.Client({
     endPoint: 'localhost',
     port: 9000,
     useSSL: false,
-    accessKey: '2KB3SpO8E9vk5bmU9brK',
-    secretKey: 'uvbKZoElanKkUxYTuIDs2SJisvbQLgfs5Zej9s2Y'
+    accessKey: process.env.STORE_ACCESS_KEY!,
+    secretKey: process.env.STORE_SECRET_KEY!
 });
 
 
@@ -38,6 +41,26 @@ export const checkObjects= async (dest: string) => {
     }
     catch (err) {
         console.error("Error in checkObjects fxn", err)
+    }
+}
+
+
+export const deleteObjects= async (prefix: string) => {
+    try {
+        const objects: string[] = []
+        const objectsStream= await storeClient.listObjectsV2(`${process.env.STORE_BUCKET}`, prefix, true)
+
+        for await (const obj of objectsStream) {
+            objects.push(obj.name!)
+        }
+
+        await storeClient.removeObjects(`${process.env.STORE_BUCKET}`, objects)
+
+        return true
+    }
+    catch (err) {
+        console.error("Error in deleteObjects fxn", err)
+        return false
     }
 }
 

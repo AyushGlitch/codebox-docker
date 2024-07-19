@@ -4,8 +4,9 @@ import { Server as HttpServer } from "http";
 import { fetchDir, fetchFileContent, saveFile } from "./fs";
 import { fetchMinioFolder, saveToMinio } from "./store";
 import chokidar from "chokidar";
+import dotenv from "dotenv";
 
-
+dotenv.config();
 
 
 const terminalManager = new TerminalManager();
@@ -13,22 +14,16 @@ const terminalManager = new TerminalManager();
 export function initWs(httpServer: HttpServer) {
     const io = new Server(httpServer, {
         cors: {
-            // Should restrict this more!
-            origin: "*",
-            methods: ["GET", "POST"],
+            origin: process.env.FRONTEND_URL,
+            methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+            credentials: true,
         },
     });
 
-    io.on("connection", async (socket) => {
-        // Auth checks should happen here
-        const host = socket.handshake.headers.host;
-        console.log(`host is ${host}`);
-        console.log(`${host?.split('.')[0]}`)
 
-        // Split the host by '.' and take the first part as replId
+    io.on("connection", async (socket) => {
         const replId= socket.handshake.query.replId as string;
         console.log(`replId is ${replId}`);
-        // const replId = host?.split('.')[0];
 
         await fetchMinioFolder(`codebox/${replId}/`, `./workspace`);
     
@@ -72,9 +67,6 @@ function initHandlers(socket: Socket, replId: string) {
         callback(data);
     });
 
-    // TODO: contents should be diff, not full file
-    // Should be validated for size
-    // Should be throttled before updating S3 (or use an S3 mount)
     socket.on("updateContent", async ({ path: filePath, content }: { path: string, content: string }) => {
         const fullPath =  `./workspace/${filePath}`;
         await saveFile(fullPath, content);

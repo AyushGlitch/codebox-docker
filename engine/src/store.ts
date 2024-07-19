@@ -1,7 +1,10 @@
 import { Client as MinioClient } from "minio";
 import fs from "fs";
 import path from "path";
+import dotenv from "dotenv";
 const { execSync } = require('child_process');
+
+dotenv.config();
 
 // const minioClient = new MinioClient({
 //     endPoint: 'localhost',
@@ -13,11 +16,11 @@ const { execSync } = require('child_process');
 
 
 const minioClient = new MinioClient({
-    endPoint: 'minio2',
+    endPoint: process.env.MINIO_ENDPOINT!,
     port: 9000,
     useSSL: false,
-    accessKey: '2KB3SpO8E9vk5bmU9brK',
-    secretKey: 'uvbKZoElanKkUxYTuIDs2SJisvbQLgfs5Zej9s2Y'
+    accessKey: process.env.STORE_ACCESS_KEY!,
+    secretKey: process.env.STORE_SECRET_KEY!,
 });
 
 

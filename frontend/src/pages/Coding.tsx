@@ -17,10 +17,11 @@ const useSocket = (codeBoxId: string) => {
 
         // copyData()
 
-        const ws= io(`ws://localhost:3001`, {
+        const ws= io(`${import.meta.env.VITE_WS_URL}`, {
             query: {
                 "replId": codeBoxId
-            }
+            },
+            timeout: 20 * 60 * 1000
         })
         setSocket(ws)
         console.log("Socket connected", ws)
@@ -45,7 +46,7 @@ function Coding() {
         async function createCodeBox() {
             try {
                 await axios.post(`${import.meta.env.VITE_ORCHESTRATOR_URL}/start`, { codeBoxId, language })
-                // await axios.post(`http://localhost:3001/copy`, { replId: codeBoxId })
+                // await axios.get(`http://localhost:3001/copy?replId=${codeBoxId}`)
 
                 setCodeBoxCreated(true)
 
@@ -75,7 +76,7 @@ function Coding() {
 
 
 function FinalCodingPage( {codeBoxId, language} : {codeBoxId: string, language: string} ) {
-    console.log(codeBoxId, language)
+    // console.log(codeBoxId, language)
     const [loaded, setLoaded]= useState(false)
     const socket= useSocket(codeBoxId)
     const [fileStructure, setFileStructure]= useState<RemoteFile[]>([])

@@ -2,6 +2,10 @@ import express from "express";
 import cors from "cors";
 import Docker from "dockerode"
 import { PrismaClient } from "@prisma/client";
+import dotenv from "dotenv";
+
+
+dotenv.config();
 
 
 const app = express();
@@ -9,7 +13,7 @@ app.use(express.json());
 app.use(cors());
 
 
-const docker = new Docker({ socketPath: '/home/ayush/.docker/desktop/docker.sock' });
+const docker = new Docker({ socketPath: process.env.DOCKER_SOCKET_PATH });
 const prisma = new PrismaClient()
 
 
@@ -34,7 +38,15 @@ app.post("/start", async (req, res) => {
                 EndpointsConfig: {
                     'my-network': {}
                 }
-            }
+            },
+            Env: [
+                "PORT=3001",
+                "STORE_ACCESS_KEY=2KB3SpO8E9vk5bmU9brK",
+                "STORE_SECRET_KEY=uvbKZoElanKkUxYTuIDs2SJisvbQLgfs5Zej9s2Y",
+                "STORE_BUCKET=code-box",
+                "MINIO_ENDPOINT=minio2",
+                "FRONTEND_URL=http://localhost:5173",
+            ]
         })
         await container.start()
 
@@ -74,7 +86,8 @@ app.post("/stop", async (req, res) => {
 
     try {
         const container= docker.getContainer(codeBoxId)
-        await container.stop()
+        await container.kill()
+        // await container.stop()
         await container.remove()
 
         await prisma.codebox.update({

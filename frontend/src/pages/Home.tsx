@@ -102,8 +102,16 @@ const Home = () => {
         // console.log(language);
 
         try {
-            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/create`, { codeBoxId: codeBoxId, language: language }, { withCredentials: true });
+            const res= await axios.post(`${import.meta.env.VITE_BACKEND_URL}/create`, { codeBoxId: codeBoxId, language: language }, { withCredentials: true });
 
+            console.log(res);
+            
+            if (res.status !== 200) {
+                toast.error("Error creating CodeBox");
+                setLoading(false);
+                return;
+            }
+            
             // console.log("Codebox created successfully");
             setLoading(false);
             navigate(`/coding?codeBoxId=${codeBoxId}&lang=${language}`);
@@ -114,7 +122,7 @@ const Home = () => {
     }
 
     return (
-        <div className="w-full mt-20 flex gap-5 mb-5">
+        <div className="w-full mt-20 flex gap-5 mb-5 max-h-screen">
             <PastCodeBoxes />
 
             <div className="w-2/3 flex flex-col justify-center items-center gap-20">

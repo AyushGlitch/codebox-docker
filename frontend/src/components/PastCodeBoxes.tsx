@@ -41,6 +41,7 @@ export default function PastCodeBoxes() {
 
         try {
             await axios.post(`${import.meta.env.VITE_ORCHESTRATOR_URL}/deleteCodebox`, { codeBoxId: codeBoxId, language: language });
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/delete`, { codeBoxId: codeBoxId, language: language });
 
             setPastCodeBoxes( prevState => prevState?.filter( (codebox) => codebox.codeboxid != codeBoxId ) )
 

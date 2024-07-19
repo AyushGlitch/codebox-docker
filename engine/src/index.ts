@@ -5,7 +5,10 @@ import { createServer } from "http";
 import { initWs } from "./ws";
 import { fetchMinioFolder } from "./store";
 
+
 dotenv.config()
+
+
 const app = express();
 app.use(cors({
   origin: "*", // Allow only this origin
@@ -14,22 +17,29 @@ app.use(cors({
 }))
 app.use(express.json());
 
+
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
 
-app.post("/copy", async (req, res) => {
-  const { replId } = req.body;
+app.get("/copy", async (req, res) => {
+  const { replId } = req.query.replId as { replId: string };
 
-  await fetchMinioFolder(`codebox/${replId}/`, `./workspace`);
-
-  res.status(200).send({ message: "Copied successfully" });
+  try {
+    await fetchMinioFolder(`codebox/${replId}/`, `./workspace`);
+    res.status(200).send({ message: "Copied successfully" });
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).send({ message: "Error copying" });
+  }
 } )
 
 
 const httpServer = createServer(app);
 initWs(httpServer);
+
 
 const port = process.env.PORT || 3001;
 httpServer.listen(port, () => {
