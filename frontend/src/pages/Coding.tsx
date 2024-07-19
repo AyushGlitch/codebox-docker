@@ -5,6 +5,7 @@ import { Socket, io } from "socket.io-client"
 import { File, RemoteFile, Type } from "../components/editor/utils/file-manager"
 import { Editor } from "../components/Editor"
 import { TerminalComp } from "../components/Terminal"
+import { ImSpinner10 } from "react-icons/im"
 
 
 const useSocket = (codeBoxId: string) => {
@@ -63,8 +64,9 @@ function Coding() {
 
     if (!codeBoxCreated) {
         return (
-            <div>
-                <h1>Creating CodeBox...</h1>
+            <div className="w-full flex flex-col gap-14 justify-center items-center mt-28">
+                <ImSpinner10 size={200} className="animate-spin" />
+                <h1 className="font-bold text-2xl text-slate-400">Creating CodeBox...</h1>
             </div>
         )
     }
@@ -114,7 +116,13 @@ function FinalCodingPage( {codeBoxId, language} : {codeBoxId: string, language: 
     };
     
     if (!loaded) {
-        return "Loading...";
+        return (
+            <div className="w-full flex flex-col gap-14 justify-center items-center mt-28">
+                <ImSpinner10 size={200} className="animate-spin" />
+                <h1 className="font-bold text-2xl text-slate-400">Preparing CodeBox...</h1>
+                <h1 className="font-medium text-xl text-slate-500">Please have patience, installing dependencies.... (May take a while)</h1>
+            </div>
+        )
     }
 
     return (
