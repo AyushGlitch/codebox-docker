@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import Docker from "dockerode"
+import { PrismaClient } from "@prisma/client";
 
 
 const app = express();
@@ -9,6 +10,7 @@ app.use(cors());
 
 
 const docker = new Docker({ socketPath: '/home/ayush/.docker/desktop/docker.sock' });
+const prisma = new PrismaClient()
 
 
 app.post("/start", async (req, res) => {
@@ -36,6 +38,21 @@ app.post("/start", async (req, res) => {
         })
         await container.start()
 
+        await prisma.codebox.upsert({
+            where: {
+                codeboxid: codeBoxId
+            },
+            update: {
+                status: "running"
+            },
+            create: {
+                codeboxid: codeBoxId,
+                containerName: codeBoxId,
+                language: language,
+                status: "running"
+            }
+        })
+
         console.log("Container started successfully");
         // @ts-ignore
         // .then(container => container.start())
@@ -60,6 +77,15 @@ app.post("/stop", async (req, res) => {
         await container.stop()
         await container.remove()
 
+        await prisma.codebox.update({
+            where: {
+                codeboxid: codeBoxId
+            },
+            data: {
+                status: "stopped"
+            }
+        })
+
         console.log("Container stopped and removed successfully");
         res.status(200).send({ message: "Resources deleted successfully" });
     }
@@ -67,6 +93,39 @@ app.post("/stop", async (req, res) => {
         console.error("Failed to delete resources", error);
     }
 })
+
+
+app.get("/containers", async (req, res) => {
+    try {
+        const data= await prisma.codebox.findMany({})
+        // console.log(data)
+        res.status(200).send(data);
+    }
+    catch (error) {
+        console.error("Failed to fetch containers", error);
+        res.status(500).send({ message: "Failed to fetch containers" });
+    }
+})
+
+
+app.post("/deleteCodebox", async (req, res) => {
+    const { codeBoxId, language } = req.body;
+
+    try {
+        await prisma.codebox.delete({
+            where: {
+                codeboxid: codeBoxId
+            }
+        })
+
+        res.status(200).send({ message: "CodeBox deleted successfully" });
+    }
+    catch (err) {
+        console.error("Error deleting CodeBox", err);
+        res.status(500).send({ message: "Failed to delete CodeBox" });
+    }
+})
+
 
 const port = process.env.PORT || 3002;
 app.listen(port, () => {

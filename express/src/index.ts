@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { copyObjectFolder } from "./storeClient";
+import { checkObjects, copyObjectFolder } from "./storeClient";
 
 
 dotenv.config();
@@ -32,9 +32,14 @@ app.post("/create", async (req, res) => {
         res.status(400).json({ message: "language is required" });
     }
 
-    await copyObjectFolder(`store-data/${language}`, `codebox/${codeBoxId}`)
-    // console.log(`CodeBox created successfully`)
-
+    const codeBoxDataExists= await checkObjects(`codebox/${codeBoxId}`)
+    if ( !codeBoxDataExists ) {
+        await copyObjectFolder(`store-data/${language}`, `codebox/${codeBoxId}`)
+        console.log(`CodeBox created successfully`)
+    }
+    else {
+        console.log(`CodeBox already exists`)
+    }
     res.status(200).json({ message: "CodeBox created successfully" });
 })
 

@@ -19,6 +19,29 @@ const storeClient = new Minio.Client({
 });
 
 
+export const checkObjects= async (dest: string) => {
+    try {
+        const objectsStream= await storeClient.listObjectsV2(`${process.env.STORE_BUCKET}`, dest, true)
+        const objects: string[] = []
+
+        for await (const obj of objectsStream) {
+            const fileKey= obj.name;
+            objects.push(obj)
+        }
+
+        if (objects.length > 0) {
+            return true
+        }
+        else {
+            return false
+        }
+    }
+    catch (err) {
+        console.error("Error in checkObjects fxn", err)
+    }
+}
+
+
 export const copyObjectFolder= async (srcPrefix: string, dest: string) => {
     try {
         const buckets= await storeClient.listBuckets()
