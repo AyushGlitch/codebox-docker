@@ -66,21 +66,20 @@ async function runMinioContainer() {
             PortBindings: {
                 '9000/tcp': [{ HostPort: '9000' }],
                 '9001/tcp': [{ HostPort: '9001' }]
-            }
+            },
+            Binds: [
+                '/home/ayush/minio/data:/data'  // Correct bind mount
+            ]
         },
         NetworkingConfig: {
             EndpointsConfig: {
                 'my-network': {}
             }
-        },
-        Volumes: {
-            '/data': {
-                bind: '~/minio/data'
-            }
         }
-        // @ts-ignore
+        //@ts-ignore
     }).then(container => container.start());
 }
+
 
 
 async function main() {
